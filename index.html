@@ -8,216 +8,194 @@
 <style>
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #020617;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
   color: #e5e7eb;
 }
 
-header {
-  background: #020617;
-  border-bottom: 1px solid #1e293b;
-  padding: 14px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 600;
+.container {
+  max-width: 420px;
+  margin: auto;
+  padding: 15px;
 }
-
-.container { padding: 12px; }
 
 .card {
   background: #020617;
-  border: 1px solid #1e293b;
-  border-radius: 14px;
-  padding: 14px;
-  margin-bottom: 12px;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
 }
 
-input {
+h2, h3 {
+  margin: 5px 0;
+  text-align: center;
+}
+
+input, button {
   width: 100%;
   padding: 10px;
-  margin-bottom: 10px;
+  margin-top: 8px;
   border-radius: 8px;
-  border: 1px solid #334155;
-  background: #020617;
-  color: #e5e7eb;
+  border: none;
   font-size: 16px;
 }
 
-.primary {
-  width: 100%;
-  padding: 12px;
-  font-size: 17px;
-  border-radius: 10px;
-  border: none;
+input {
+  background: #020617;
+  color: white;
+  border: 1px solid #334155;
+}
+
+button {
   background: #2563eb;
   color: white;
-}
-
-.score-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.score {
-  font-size: 32px;
   font-weight: bold;
 }
 
-.over, .info {
-  font-size: 14px;
-  color: #94a3b8;
-}
-
-.target {
-  font-size: 15px;
-  color: #f87171;
-  font-weight: 600;
+button.secondary {
+  background: #475569;
 }
 
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
-button {
-  padding: 16px;
-  font-size: 18px;
-  border-radius: 12px;
-  border: none;
-  color: white;
+.score {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: center;
 }
 
-.run { background: #16a34a; }
-.extra { background: #d97706; }
-.wicket { background: #dc2626; }
-.undo { background: #475569; }
+.over {
+  font-size: 14px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+#overLine {
+  display: flex;
+  overflow-x: auto;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+#overLine span {
+  padding: 6px 10px;
+  background: #1e293b;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: #64748b;
+}
 </style>
 </head>
 
 <body>
-
-<header>🏏 Gully Cricket Score Tracker</header>
-
 <div class="container">
 
-<div class="card">
+<div class="card" id="setup">
+  <h2>🏏 Match Setup</h2>
   <input id="battingTeam" placeholder="Batting Team Name">
   <input id="fieldingTeam" placeholder="Fielding Team Name">
-  <input id="players" type="number" placeholder="Players per team (e.g. 6)">
-  <input id="overs" type="number" value="5">
-  <button class="primary" onclick="startMatch()">Start Match</button>
+  <input id="players" type="number" placeholder="Players per team">
+  <input id="overs" type="number" placeholder="Overs">
+  <button onclick="startMatch()">Start Match</button>
 </div>
 
 <div class="card" id="scoreCard" style="display:none;">
-  <div class="score-box">
-    <div>
-      <div id="inningTitle"></div>
-      <div class="over" id="over"></div>
-      <div class="target" id="target"></div>
-      <div class="info" id="chaseInfo"></div>
-    </div>
-    <div class="score" id="score">0/0</div>
-  </div>
+  <h3 id="teamTitle"></h3>
+  <div class="score" id="score">0 / 0</div>
+  <div class="over" id="overInfo">Over: 0.0</div>
+  <div class="over" id="targetInfo"></div>
+</div>
+
+<div class="card" id="overLineCard" style="display:none;">
+  <div class="over">This Over</div>
+  <div id="overLine"></div>
 </div>
 
 <div class="card" id="controls" style="display:none;">
   <div class="grid">
-    <button class="run" onclick="addRun(0)">0</button>
-    <button class="run" onclick="addRun(1)">1</button>
-    <button class="run" onclick="addRun(2)">2</button>
-    <button class="run" onclick="addRun(3)">3</button>
-    <button class="run" onclick="addRun(4)">4</button>
-    <button class="run" onclick="addRun(5)">5</button>
-    <button class="run" onclick="addRun(6)">6</button>
-    <button class="extra" onclick="wide()">Wide</button>
-    <button class="extra" onclick="noBall()">No Ball</button>
-    <button class="wicket" onclick="wicket()">Wicket</button>
-    <button class="undo" onclick="undo()">Undo</button>
+    <button onclick="addRun(0)">0</button>
+    <button onclick="addRun(1)">1</button>
+    <button onclick="addRun(2)">2</button>
+    <button onclick="addRun(3)">3</button>
+    <button onclick="addRun(4)">4</button>
+    <button onclick="addRun(5)">5</button>
+    <button onclick="addRun(6)">6</button>
+    <button onclick="wide()">Wd</button>
+    <button onclick="wicket()">W</button>
   </div>
+  <button class="secondary" onclick="undo()">Undo</button>
 </div>
 
-<div class="card" id="result" style="display:none;">
-  <div class="card" id="overLineCard" style="display:none;">
-  <div class="over">This Over</div>
-  <div id="overLine" style="white-space: nowrap; overflow-x: auto;">
-  </div>
-  </div>
+<div class="footer">
+  Gully Cricket Tracker • Offline • Dark Mode
 </div>
 
 </div>
 
 <script>
-let battingTeam, fieldingTeam, maxOvers, playersPerTeam;
 let runs = 0, wickets = 0, balls = 0;
+let totalOvers, totalPlayers;
 let innings = 1;
+let firstInningsScore = 0;
 let target = 0;
+
+let currentOver = [];
+let legalBallsThisOver = 0;
 
 let history = [];
 
+function startMatch() {
+  totalOvers = +overs.value;
+  totalPlayers = +players.value;
+  document.getElementById("setup").style.display = "none";
+  document.getElementById("scoreCard").style.display = "block";
+  document.getElementById("controls").style.display = "block";
+  document.getElementById("overLineCard").style.display = "block";
+  updateUI();
+}
+
 function saveState() {
-  history.push({ runs, wickets, balls, innings, target });
+  history.push({
+    runs, wickets, balls, innings,
+    currentOver: [...currentOver],
+    legalBallsThisOver
+  });
 }
 
 function undo() {
-  if (history.length === 0) return;
-  let prev = history.pop();
-  runs = prev.runs;
-  wickets = prev.wickets;
-  balls = prev.balls;
-  innings = prev.innings;
-  target = prev.target;
-  document.getElementById("controls").style.display = "block";
-  document.getElementById("result").style.display = "none";
+  if (!history.length) return;
+  let s = history.pop();
+  runs = s.runs;
+  wickets = s.wickets;
+  balls = s.balls;
+  innings = s.innings;
+  currentOver = s.currentOver;
+  legalBallsThisOver = s.legalBallsThisOver;
   updateUI();
-}
-
-function startMatch() {
-  battingTeam = document.getElementById("battingTeam").value;
-  fieldingTeam = document.getElementById("fieldingTeam").value;
-  maxOvers = parseInt(document.getElementById("overs").value);
-  playersPerTeam = parseInt(document.getElementById("players").value);
-  updateUI();
-  document.getElementById("scoreCard").style.display = "block";
-  document.getElementById("controls").style.display = "block";
-}
-
-function updateUI() {
-  let overs = Math.floor(balls / 6) + "." + (balls % 6);
-  document.getElementById("score").innerText = runs + "/" + wickets;
-  document.getElementById("over").innerText = "Overs: " + overs;
-
-  if (innings === 1) {
-    document.getElementById("inningTitle").innerText = battingTeam + " Batting";
-    document.getElementById("target").innerText = "";
-    document.getElementById("chaseInfo").innerText = "";
-  } else {
-    let ballsLeft = maxOvers * 6 - balls;
-    let runsNeeded = target - runs;
-    document.getElementById("inningTitle").innerText = fieldingTeam + " Batting";
-    document.getElementById("target").innerText = "Target: " + target;
-    document.getElementById("chaseInfo").innerText =
-      runsNeeded + " runs needed in " + ballsLeft + " balls";
-  }
 }
 
 function addRun(r) {
   saveState();
   runs += r;
   balls++;
-  checkState();
+  legalBallsThisOver++;
+  currentOver.push(r);
+  checkOver();
 }
 
 function wide() {
   saveState();
   runs++;
-  updateUI();
-}
-
-function noBall() {
-  saveState();
-  runs++;
+  currentOver.push("Wd");
   updateUI();
 }
 
@@ -225,40 +203,59 @@ function wicket() {
   saveState();
   wickets++;
   balls++;
-  checkState();
+  legalBallsThisOver++;
+  currentOver.push("W");
+  if (wickets === totalPlayers - 1) endInnings();
+  checkOver();
 }
 
-function checkState() {
-  if (innings === 2 && runs >= target) {
-    endMatch();
-    return;
+function checkOver() {
+  if (legalBallsThisOver === 6) {
+    currentOver = [];
+    legalBallsThisOver = 0;
   }
-  if (balls >= maxOvers * 6 || wickets >= playersPerTeam) {
-    endInnings();
-  } else {
-    updateUI();
+  checkEnd();
+  updateUI();
+}
+
+function checkEnd() {
+  if (balls === totalOvers * 6) endInnings();
+  if (innings === 2 && runs >= target) {
+    alert("🎉 Match Finished! Target Chased.");
+    document.getElementById("controls").style.display = "none";
   }
 }
 
 function endInnings() {
   if (innings === 1) {
-    target = runs + 1;
+    firstInningsScore = runs;
+    target = firstInningsScore + 1;
+    runs = wickets = balls = 0;
     innings = 2;
-    runs = 0;
-    wickets = 0;
-    balls = 0;
-    updateUI();
+    currentOver = [];
+    legalBallsThisOver = 0;
+    alert("Second Innings Starts");
   } else {
-    endMatch();
+    alert("🏁 Match Finished");
+    document.getElementById("controls").style.display = "none";
   }
 }
 
-function endMatch() {
-  document.getElementById("controls").style.display = "none";
-  document.getElementById("result").style.display = "block";
-  let winner = runs >= target ? fieldingTeam : battingTeam;
-  document.getElementById("result").innerHTML =
-    "<h3>" + winner + " won the match 🏆</h3>";
+function updateUI() {
+  let over = Math.floor(balls / 6) + "." + (balls % 6);
+  score.innerText = `${runs} / ${wickets}`;
+  overInfo.innerText = `Over: ${over}`;
+
+  teamTitle.innerText = innings === 1
+    ? battingTeam.value + " (Batting)"
+    : fieldingTeam.value + " (Chasing)";
+
+  if (innings === 2) {
+    let ballsLeft = totalOvers * 6 - balls;
+    targetInfo.innerText = `Target: ${target} | Need ${target - runs} in ${ballsLeft} balls`;
+  } else targetInfo.innerText = "";
+
+  overLine.innerHTML = currentOver.map(b => `<span>${b}</span>`).join("");
 }
 </script>
 
