@@ -2,115 +2,167 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Local Cricket Score</title>
+<title>Cricket Score Tracker</title>
 
 <style>
 body {
   font-family: Arial;
-  padding: 20px;
-  background: #f4f4f4;
+  background: #0b3d91;
+  color: white;
+  text-align: center;
+  margin: 0;
 }
-.card {
-  background: white;
+
+.container {
   padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 8px;
 }
+
+.card {
+  background: #ffffff;
+  color: black;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
 button {
   padding: 10px;
   margin: 5px;
   font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
 }
-h2 { margin-top: 0; }
+
+.run-btn { background: #1abc9c; color: white; }
+.extra-btn { background: #f39c12; color: white; }
+.wicket-btn { background: #e74c3c; color: white; }
+
+h2, h3 { margin: 8px; }
 </style>
 </head>
 
 <body>
 
+<div class="container">
+
+<h2>🏏 Cricket Score Tracker</h2>
+
 <div class="card">
-  <h2>🏏 Start Match</h2>
-  Overs:
-  <input type="number" id="totalOvers" value="5">
-  <br><br>
+  Team A: <input id="teamA" placeholder="Team A"><br><br>
+  Team B: <input id="teamB" placeholder="Team B"><br><br>
+  Overs: <input id="overs" type="number" value="5"><br><br>
   <button onclick="startMatch()">Start Match</button>
 </div>
 
-<div class="card" id="live" style="display:none">
-  <h2>Live Score</h2>
-  <p><b>Score:</b> <span id="score">0</span>/<span id="wickets">0</span></p>
-  <p><b>Overs:</b> <span id="overs">0.0</span></p>
-
-  <button onclick="addRun(0)">0</button>
-  <button onclick="addRun(1)">1</button>
-  <button onclick="addRun(2)">2</button>
-  <button onclick="addRun(4)">4</button>
-  <button onclick="addRun(6)">6</button>
-  <button onclick="addWicket()">Wicket</button>
-  <br>
-  <button onclick="undo()">Undo</button>
+<div class="card" id="scoreCard" style="display:none;">
+  <h3 id="inningTitle"></h3>
+  <h2 id="score">0/0</h2>
+  <p id="over">Overs: 0.0</p>
+  <p id="target"></p>
 </div>
 
-<div class="card" id="result" style="display:none">
-  <h2>Match Ended</h2>
-  <p>Final Score: <span id="finalScore"></span></p>
+<div class="card" id="controls" style="display:none;">
+  <button class="run-btn" onclick="addRun(0)">0</button>
+  <button class="run-btn" onclick="addRun(1)">1</button>
+  <button class="run-btn" onclick="addRun(2)">2</button>
+  <button class="run-btn" onclick="addRun(3)">3</button>
+  <button class="run-btn" onclick="addRun(4)">4</button>
+  <button class="run-btn" onclick="addRun(5)">5</button>
+  <button class="run-btn" onclick="addRun(6)">6</button><br>
+
+  <button class="extra-btn" onclick="wide()">Wide</button>
+  <button class="extra-btn" onclick="noBall()">No Ball</button>
+  <button class="wicket-btn" onclick="wicket()">Wicket</button>
+</div>
+
+<div class="card" id="result" style="display:none;"></div>
+
 </div>
 
 <script>
-let runs = 0;
-let wickets = 0;
-let balls = 0;
-let totalOvers = 0;
-let history = [];
+let teamA, teamB, maxOvers;
+let runs = 0, wickets = 0, balls = 0;
+let innings = 1;
+let target = 0;
 
 function startMatch() {
-  totalOvers = document.getElementById("totalOvers").value;
-  document.getElementById("live").style.display = "block";
+  teamA = teamA = document.getElementById("teamA").value;
+  teamB = teamB = document.getElementById("teamB").value;
+  maxOvers = parseInt(document.getElementById("overs").value);
+
+  document.getElementById("scoreCard").style.display = "block";
+  document.getElementById("controls").style.display = "block";
+  updateUI();
+}
+
+function updateUI() {
+  let overs = Math.floor(balls / 6) + "." + (balls % 6);
+  document.getElementById("score").innerText = runs + "/" + wickets;
+  document.getElementById("over").innerText = "Overs: " + overs;
+
+  if (innings === 1) {
+    document.getElementById("inningTitle").innerText = teamA + " Batting";
+  } else {
+    document.getElementById("inningTitle").innerText = teamB + " Batting";
+    document.getElementById("target").innerText = "Target: " + target;
+  }
 }
 
 function addRun(r) {
-  saveState();
   runs += r;
   balls++;
-  update();
+  checkOver();
 }
 
-function addWicket() {
-  saveState();
+function wide() {
+  runs += 1;
+  updateUI();
+}
+
+function noBall() {
+  runs += 1;
+  updateUI();
+}
+
+function wicket() {
   wickets++;
   balls++;
-  update();
+  checkOver();
 }
 
-function update() {
-  let overs = Math.floor(balls / 6) + "." + (balls % 6);
-  document.getElementById("score").innerText = runs;
-  document.getElementById("wickets").innerText = wickets;
-  document.getElementById("overs").innerText = overs;
+function checkOver() {
+  if (balls >= maxOvers * 6 || wickets >= 10) {
+    endInnings();
+  } else {
+    updateUI();
+  }
+}
 
-  if (Math.floor(balls / 6) >= totalOvers || wickets == 10) {
+function endInnings() {
+  if (innings === 1) {
+    target = runs + 1;
+    innings = 2;
+    runs = 0;
+    wickets = 0;
+    balls = 0;
+    updateUI();
+  } else {
     endMatch();
   }
 }
 
-function saveState() {
-  history.push({ runs, wickets, balls });
-}
-
-function undo() {
-  if (history.length > 0) {
-    let last = history.pop();
-    runs = last.runs;
-    wickets = last.wickets;
-    balls = last.balls;
-    update();
-  }
-}
-
 function endMatch() {
-  document.getElementById("live").style.display = "none";
+  document.getElementById("controls").style.display = "none";
   document.getElementById("result").style.display = "block";
-  document.getElementById("finalScore").innerText =
-    runs + "/" + wickets + " in " + totalOvers + " overs";
+
+  if (runs >= target) {
+    document.getElementById("result").innerHTML =
+      "<h2>" + teamB + " won the match!</h2>";
+  } else {
+    document.getElementById("result").innerHTML =
+      "<h2>" + teamA + " won the match!</h2>";
+  }
 }
 </script>
 
