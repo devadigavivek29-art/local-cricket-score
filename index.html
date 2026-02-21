@@ -33,9 +33,9 @@ h2, h3 {
 
 input, button {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   margin-top: 8px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   font-size: 16px;
 }
@@ -63,7 +63,7 @@ button.secondary {
 }
 
 .score {
-  font-size: 30px;
+  font-size: 32px;
   font-weight: bold;
   text-align: center;
 }
@@ -88,7 +88,7 @@ button.secondary {
 
 .result {
   text-align: center;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
   color: #22c55e;
 }
@@ -104,6 +104,7 @@ button.secondary {
 <body>
 <div class="container">
 
+<!-- SETUP -->
 <div class="card" id="setup">
   <h2>🏏 Match Setup</h2>
   <input id="battingTeam" placeholder="Batting Team Name">
@@ -113,6 +114,7 @@ button.secondary {
   <button onclick="startMatch()">Start Match</button>
 </div>
 
+<!-- SCORE -->
 <div class="card" id="scoreCard" style="display:none;">
   <h3 id="teamTitle"></h3>
   <div class="score" id="score">0 / 0</div>
@@ -120,11 +122,13 @@ button.secondary {
   <div class="sub" id="targetInfo"></div>
 </div>
 
+<!-- THIS OVER -->
 <div class="card" id="overCard" style="display:none;">
   <div class="sub">This Over</div>
   <div id="overLine"></div>
 </div>
 
+<!-- CONTROLS -->
 <div class="card" id="controls" style="display:none;">
   <div class="grid">
     <button onclick="addRun(0)">0</button>
@@ -140,6 +144,7 @@ button.secondary {
   <button class="secondary" onclick="undo()">Undo</button>
 </div>
 
+<!-- RESULT -->
 <div class="card" id="resultCard" style="display:none;">
   <div class="result" id="resultText"></div>
 </div>
@@ -150,46 +155,57 @@ button.secondary {
 
 <script>
 let runs = 0, wickets = 0, balls = 0;
-let totalOvers, totalPlayers;
+let totalOvers = 0, totalPlayers = 0;
 let innings = 1;
 let firstInningsScore = 0;
 let target = 0;
 
+let legalBallsThisOver = 0;
 let currentOver = [];
-let legalBalls = 0;
 let history = [];
 
+/* ---------- START ---------- */
 function startMatch() {
-  totalOvers = +overs.value;
-  totalPlayers = +players.value;
+  totalOvers = Number(overs.value);
+  totalPlayers = Number(players.value);
+
   setup.style.display = "none";
-  scoreCard.style.display = controls.style.display = overCard.style.display = "block";
+  scoreCard.style.display =
+  controls.style.display =
+  overCard.style.display = "block";
+
   updateUI();
 }
 
+/* ---------- UNDO ---------- */
 function saveState() {
-  history.push({ runs, wickets, balls, innings, currentOver:[...currentOver], legalBalls });
+  history.push(JSON.stringify({
+    runs, wickets, balls, innings,
+    legalBallsThisOver,
+    currentOver
+  }));
 }
 
 function undo() {
   if (!history.length) return;
-  let s = history.pop();
-  ({ runs, wickets, balls, innings, legalBalls } = s);
-  currentOver = s.currentOver;
+  let s = JSON.parse(history.pop());
+  ({ runs, wickets, balls, innings, legalBallsThisOver, currentOver } = s);
   updateUI();
 }
 
+/* ---------- SCORING ---------- */
 function addRun(r) {
   saveState();
   runs += r;
-  balls++; legalBalls++;
+  balls++;
+  legalBallsThisOver++;
   currentOver.push(r);
   afterBall();
 }
 
 function wide() {
   saveState();
-  runs++;
+  runs += 1;
   currentOver.push("Wd");
   updateUI();
 }
@@ -197,60 +213,70 @@ function wide() {
 function wicket() {
   saveState();
   wickets++;
-  balls++; legalBalls++;
+  balls++;
+  legalBallsThisOver++;
   currentOver.push("W");
-
-  if (wickets === totalPlayers - 1) {
-    endInnings();
-    return;
-  }
   afterBall();
 }
 
+/* ---------- BALL / OVER ---------- */
 function afterBall() {
-  if (legalBalls === 6) {
+  if (legalBallsThisOver === 6) {
+    legalBallsThisOver = 0;
     currentOver = [];
-    legalBalls = 0;
   }
-  checkEnd();
+  checkInningsEnd();
   updateUI();
 }
 
-function checkEnd() {
-  if (balls === totalOvers * 6) endInnings();
-  if (innings === 2 && runs >= target) finishMatch(battingTeam.value + " WON THE MATCH");
-}
+/* ---------- INNINGS LOGIC (CORRECT LAST MAN STANDING) ---------- */
+function checkInningsEnd() {
+  const maxBalls = totalOvers * 6;
 
-function endInnings() {
-  if (innings === 1) {
-    firstInningsScore = runs;
-    target = firstInningsScore + 1;
-    runs = wickets = balls = 0;
-    innings = 2;
-    currentOver = [];
-    legalBalls = 0;
-  } else {
-    finishMatch(fieldingTeam.value + " WON THE MATCH");
+  // Target chased (2nd innings)
+  if (innings === 2 && runs >= target) {
+    endMatch(fieldingTeam.value + " WON THE MATCH");
+    return;
+  }
+
+  // All out OR overs finished
+  if (balls >= maxBalls || wickets === totalPlayers) {
+    if (innings === 1) {
+      firstInningsScore = runs;
+      target = firstInningsScore + 1;
+
+      // Reset for second innings
+      runs = wickets = balls = 0;
+      legalBallsThisOver = 0;
+      currentOver = [];
+      innings = 2;
+    } else {
+      endMatch(battingTeam.value + " WON THE MATCH");
+    }
   }
 }
 
-function finishMatch(msg) {
+/* ---------- END MATCH ---------- */
+function endMatch(message) {
   controls.style.display = "none";
   resultCard.style.display = "block";
-  resultText.innerText = msg;
+  resultText.innerText = message;
 }
 
+/* ---------- UI ---------- */
 function updateUI() {
   score.innerText = `${runs} / ${wickets}`;
-  overInfo.innerText = `Over: ${Math.floor(balls/6)}.${balls%6}`;
+  overInfo.innerText = `Over: ${Math.floor(balls / 6)}.${balls % 6}`;
 
-  teamTitle.innerText = innings === 1
-    ? battingTeam.value + " (Batting)"
-    : fieldingTeam.value + " (Chasing)";
+  teamTitle.innerText =
+    innings === 1
+      ? battingTeam.value + " (Batting)"
+      : fieldingTeam.value + " (Chasing)";
 
-  targetInfo.innerText = innings === 2
-    ? `Target ${target} | Need ${target-runs} in ${(totalOvers*6)-balls} balls`
-    : "";
+  targetInfo.innerText =
+    innings === 2
+      ? `Target ${target} | Need ${target - runs} in ${(totalOvers * 6) - balls} balls`
+      : "";
 
   overLine.innerHTML = currentOver.map(b => `<span>${b}</span>`).join("");
 }
