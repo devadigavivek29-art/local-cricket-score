@@ -92,6 +92,7 @@ button {
 .run { background: #16a34a; }
 .extra { background: #d97706; }
 .wicket { background: #dc2626; }
+.undo { background: #475569; }
 </style>
 </head>
 
@@ -105,7 +106,7 @@ button {
   <input id="battingTeam" placeholder="Batting Team Name">
   <input id="fieldingTeam" placeholder="Fielding Team Name">
   <input id="players" type="number" placeholder="Players per team (e.g. 6)">
-  <input id="overs" type="number" placeholder="Overs" value="5">
+  <input id="overs" type="number" value="5">
   <button class="primary" onclick="startMatch()">Start Match</button>
 </div>
 
@@ -133,6 +134,7 @@ button {
     <button class="extra" onclick="wide()">Wide</button>
     <button class="extra" onclick="noBall()">No Ball</button>
     <button class="wicket" onclick="wicket()">Wicket</button>
+    <button class="undo" onclick="undo()">Undo</button>
   </div>
 </div>
 
@@ -146,15 +148,33 @@ let runs = 0, wickets = 0, balls = 0;
 let innings = 1;
 let target = 0;
 
+let history = [];
+
+function saveState() {
+  history.push({ runs, wickets, balls, innings, target });
+}
+
+function undo() {
+  if (history.length === 0) return;
+  let prev = history.pop();
+  runs = prev.runs;
+  wickets = prev.wickets;
+  balls = prev.balls;
+  innings = prev.innings;
+  target = prev.target;
+  document.getElementById("controls").style.display = "block";
+  document.getElementById("result").style.display = "none";
+  updateUI();
+}
+
 function startMatch() {
   battingTeam = document.getElementById("battingTeam").value;
   fieldingTeam = document.getElementById("fieldingTeam").value;
   maxOvers = parseInt(document.getElementById("overs").value);
   playersPerTeam = parseInt(document.getElementById("players").value);
-
+  updateUI();
   document.getElementById("scoreCard").style.display = "block";
   document.getElementById("controls").style.display = "block";
-  updateUI();
 }
 
 function updateUI() {
@@ -163,15 +183,13 @@ function updateUI() {
   document.getElementById("over").innerText = "Overs: " + overs;
 
   if (innings === 1) {
-    document.getElementById("inningTitle").innerText =
-      battingTeam + " Batting";
+    document.getElementById("inningTitle").innerText = battingTeam + " Batting";
     document.getElementById("target").innerText = "";
     document.getElementById("chaseInfo").innerText = "";
   } else {
     let ballsLeft = maxOvers * 6 - balls;
     let runsNeeded = target - runs;
-    document.getElementById("inningTitle").innerText =
-      fieldingTeam + " Batting";
+    document.getElementById("inningTitle").innerText = fieldingTeam + " Batting";
     document.getElementById("target").innerText = "Target: " + target;
     document.getElementById("chaseInfo").innerText =
       runsNeeded + " runs needed in " + ballsLeft + " balls";
@@ -179,15 +197,26 @@ function updateUI() {
 }
 
 function addRun(r) {
+  saveState();
   runs += r;
   balls++;
   checkState();
 }
 
-function wide() { runs++; updateUI(); }
-function noBall() { runs++; updateUI(); }
+function wide() {
+  saveState();
+  runs++;
+  updateUI();
+}
+
+function noBall() {
+  saveState();
+  runs++;
+  updateUI();
+}
 
 function wicket() {
+  saveState();
   wickets++;
   balls++;
   checkState();
