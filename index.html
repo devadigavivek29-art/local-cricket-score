@@ -3,38 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cricket Score Tracker</title>
+<title>Gully Cricket Score Tracker</title>
 
 <style>
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
-  background: #f1f5f9;
+  background: #020617;
+  color: #e5e7eb;
 }
+
 header {
-  background: #0f172a;
-  color: white;
+  background: #020617;
+  border-bottom: 1px solid #1e293b;
   padding: 14px;
   text-align: center;
   font-size: 18px;
   font-weight: 600;
 }
+
 .container { padding: 12px; }
+
 .card {
-  background: white;
+  background: #020617;
+  border: 1px solid #1e293b;
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
+
 input {
   width: 100%;
   padding: 10px;
   margin-bottom: 10px;
   border-radius: 8px;
-  border: 1px solid #cbd5f5;
+  border: 1px solid #334155;
+  background: #020617;
+  color: #e5e7eb;
   font-size: 16px;
 }
+
 .primary {
   width: 100%;
   padding: 12px;
@@ -44,50 +52,58 @@ input {
   background: #2563eb;
   color: white;
 }
+
 .score-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+
 .score {
-  font-size: 30px;
+  font-size: 32px;
   font-weight: bold;
 }
+
 .over, .info {
   font-size: 14px;
-  color: #475569;
+  color: #94a3b8;
 }
+
 .target {
   font-size: 15px;
-  color: #dc2626;
+  color: #f87171;
   font-weight: 600;
 }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
 }
+
 button {
   padding: 16px;
   font-size: 18px;
   border-radius: 12px;
   border: none;
+  color: white;
 }
-.run { background: #22c55e; color: white; }
-.extra { background: #f59e0b; color: white; }
-.wicket { background: #ef4444; color: white; }
+
+.run { background: #16a34a; }
+.extra { background: #d97706; }
+.wicket { background: #dc2626; }
 </style>
 </head>
 
 <body>
 
-<header>🏏 Cricket Score Tracker</header>
+<header>🏏 Gully Cricket Score Tracker</header>
 
 <div class="container">
 
 <div class="card">
-  <input id="teamA" placeholder="Team A Name">
-  <input id="teamB" placeholder="Team B Name">
+  <input id="battingTeam" placeholder="Batting Team Name">
+  <input id="fieldingTeam" placeholder="Fielding Team Name">
   <input id="players" type="number" placeholder="Players per team (e.g. 6)">
   <input id="overs" type="number" placeholder="Overs" value="5">
   <button class="primary" onclick="startMatch()">Start Match</button>
@@ -125,14 +141,14 @@ button {
 </div>
 
 <script>
-let teamA, teamB, maxOvers, playersPerTeam;
+let battingTeam, fieldingTeam, maxOvers, playersPerTeam;
 let runs = 0, wickets = 0, balls = 0;
 let innings = 1;
 let target = 0;
 
 function startMatch() {
-  teamA = teamA = document.getElementById("teamA").value;
-  teamB = teamB = document.getElementById("teamB").value;
+  battingTeam = document.getElementById("battingTeam").value;
+  fieldingTeam = document.getElementById("fieldingTeam").value;
   maxOvers = parseInt(document.getElementById("overs").value);
   playersPerTeam = parseInt(document.getElementById("players").value);
 
@@ -147,76 +163,13 @@ function updateUI() {
   document.getElementById("over").innerText = "Overs: " + overs;
 
   if (innings === 1) {
-    document.getElementById("inningTitle").innerText = teamA + " Batting";
+    document.getElementById("inningTitle").innerText =
+      battingTeam + " Batting";
     document.getElementById("target").innerText = "";
     document.getElementById("chaseInfo").innerText = "";
   } else {
     let ballsLeft = maxOvers * 6 - balls;
     let runsNeeded = target - runs;
-    document.getElementById("inningTitle").innerText = teamB + " Batting";
-    document.getElementById("target").innerText = "Target: " + target;
-    document.getElementById("chaseInfo").innerText =
-      runsNeeded + " runs needed in " + ballsLeft + " balls";
-  }
-}
-
-function addRun(r) {
-  runs += r;
-  balls++;
-  checkState();
-}
-
-function wide() {
-  runs++;
-  updateUI();
-}
-
-function noBall() {
-  runs++;
-  updateUI();
-}
-
-function wicket() {
-  wickets++;
-  balls++;
-  checkState();
-}
-
-function checkState() {
-  if (innings === 2 && runs >= target) {
-    endMatch();
-    return;
-  }
-
-  if (balls >= maxOvers * 6 || wickets >= playersPerTeam - 1) {
-    endInnings();
-  } else {
-    updateUI();
-  }
-}
-
-function endInnings() {
-  if (innings === 1) {
-    target = runs + 1;
-    innings = 2;
-    runs = 0;
-    wickets = 0;
-    balls = 0;
-    updateUI();
-  } else {
-    endMatch();
-  }
-}
-
-function endMatch() {
-  document.getElementById("controls").style.display = "none";
-  document.getElementById("result").style.display = "block";
-
-  let winner = runs >= target ? teamB : teamA;
-  document.getElementById("result").innerHTML =
-    "<h3>" + winner + " won the match 🏆</h3>";
-}
-</script>
-
-</body>
-</html>
+    document.getElementById("inningTitle").innerText =
+      fieldingTeam + " Batting";
+    document.get
