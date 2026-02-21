@@ -172,4 +172,60 @@ function updateUI() {
     let runsNeeded = target - runs;
     document.getElementById("inningTitle").innerText =
       fieldingTeam + " Batting";
-    document.get
+    document.getElementById("target").innerText = "Target: " + target;
+    document.getElementById("chaseInfo").innerText =
+      runsNeeded + " runs needed in " + ballsLeft + " balls";
+  }
+}
+
+function addRun(r) {
+  runs += r;
+  balls++;
+  checkState();
+}
+
+function wide() { runs++; updateUI(); }
+function noBall() { runs++; updateUI(); }
+
+function wicket() {
+  wickets++;
+  balls++;
+  checkState();
+}
+
+function checkState() {
+  if (innings === 2 && runs >= target) {
+    endMatch();
+    return;
+  }
+  if (balls >= maxOvers * 6 || wickets >= playersPerTeam) {
+    endInnings();
+  } else {
+    updateUI();
+  }
+}
+
+function endInnings() {
+  if (innings === 1) {
+    target = runs + 1;
+    innings = 2;
+    runs = 0;
+    wickets = 0;
+    balls = 0;
+    updateUI();
+  } else {
+    endMatch();
+  }
+}
+
+function endMatch() {
+  document.getElementById("controls").style.display = "none";
+  document.getElementById("result").style.display = "block";
+  let winner = runs >= target ? fieldingTeam : battingTeam;
+  document.getElementById("result").innerHTML =
+    "<h3>" + winner + " won the match 🏆</h3>";
+}
+</script>
+
+</body>
+</html>
