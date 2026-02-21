@@ -6,215 +6,281 @@
 <title>Gully Cricket Tracker</title>
 
 <style>
-:root{
-  --bg:#0b1220;
-  --card:#121c33;
-  --text:#ffffff;
-  --muted:#9aa4bf;
+body {
+  margin: 0;
+  font-family: system-ui, Arial;
+  background: #0f172a;
+  color: #e5e7eb;
 }
 
-*{box-sizing:border-box;font-family:system-ui,-apple-system;}
-
-body{
-  margin:0;
-  background:linear-gradient(180deg,#050914,#0b1220);
-  color:var(--text);
-  min-height:100vh;
-  display:flex;
-  justify-content:center;
+.container {
+  max-width: 420px;
+  margin: auto;
+  padding: 12px;
 }
 
-.app{
-  width:100%;
-  max-width:430px;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  min-height:100vh;
+.card {
+  background: #020617;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
 }
 
-.card{
-  background:var(--card);
-  border-radius:16px;
-  padding:16px;
-  margin-bottom:14px;
-  box-shadow:0 10px 25px rgba(0,0,0,.4);
+h2, h3 {
+  text-align: center;
+  margin: 6px 0;
 }
 
-/* HEADER */
-.score{
-  text-align:center;
-}
-.score h2{
-  margin:0;
-  font-size:22px;
-}
-.score h1{
-  margin:6px 0;
-  font-size:44px;
-}
-.score p{
-  margin:0;
-  color:var(--muted);
+input, button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
 }
 
-/* OVER LINE */
-.over-line{
-  display:flex;
-  gap:6px;
-  overflow-x:auto;
-  justify-content:center;
-  padding-top:6px;
-}
-.ball{
-  min-width:38px;
-  height:38px;
-  border-radius:10px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  background:#1d294a;
+input {
+  background: #020617;
+  border: 1px solid #334155;
+  color: white;
 }
 
-/* BUTTON GRID */
-.controls{
-  flex:1;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
+button {
+  background: #2563eb;
+  color: white;
+  font-weight: bold;
 }
 
-.btn{
-  height:62px;
-  border:none;
-  border-radius:14px;
-  font-size:20px;
-  font-weight:700;
-  cursor:pointer;
+button.secondary {
+  background: #475569;
 }
 
-/* Button colors */
-.run{background:#e5e7eb;color:#000;}
-.four{background:#facc15;color:#000;}
-.six{background:#22c55e;color:#000;}
-.wide{background:#a855f7;color:#fff;}
-.wicket{background:#ef4444;color:#fff;}
-
-.undo{
-  grid-column:1/-1;
-  background:#374151;
-  color:#fff;
-  height:58px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-/* FOOTER */
-.footer{
-  text-align:center;
-  color:#6b7280;
-  font-size:13px;
-  padding-bottom:6px;
+.score {
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.sub {
+  font-size: 14px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+#overLine {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+#overLine span {
+  padding: 6px 10px;
+  background: #1e293b;
+  border-radius: 6px;
+}
+
+.result {
+  text-align: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #22c55e;
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: #64748b;
 }
 </style>
 </head>
 
 <body>
-<div class="app">
+<div class="container">
 
-  <div class="card score">
-    <h2 id="teamName">Batting Team</h2>
-    <h1 id="score">0 / 0</h1>
-    <p id="over">Over: 0.0</p>
-    <p id="target"></p>
+<!-- SETUP -->
+<div class="card" id="setup">
+  <h2>🏏 Match Setup</h2>
+  <input id="battingTeam" placeholder="Batting Team Name">
+  <input id="fieldingTeam" placeholder="Fielding Team Name">
+  <input id="players" type="number" placeholder="Players per Team">
+  <input id="overs" type="number" placeholder="Overs">
+  <button onclick="startMatch()">Start Match</button>
+</div>
+
+<!-- SCORE -->
+<div class="card" id="scoreCard" style="display:none;">
+  <h3 id="teamTitle"></h3>
+  <div class="score" id="score">0 / 0</div>
+  <div class="sub" id="overInfo">Over: 0.0</div>
+  <div class="sub" id="targetInfo"></div>
+</div>
+
+<!-- THIS OVER -->
+<div class="card" id="overCard" style="display:none;">
+  <div class="sub">This Over</div>
+  <div id="overLine"></div>
+</div>
+
+<!-- CONTROLS -->
+<div class="card" id="controls" style="display:none;">
+  <div class="grid">
+    <button onclick="addRun(0)">0</button>
+    <button onclick="addRun(1)">1</button>
+    <button onclick="addRun(2)">2</button>
+    <button onclick="addRun(3)">3</button>
+    <button onclick="addRun(4)">4</button>
+    <button onclick="addRun(5)">5</button>
+    <button onclick="addRun(6)">6</button>
+    <button onclick="wide()">Wd</button>
+    <button onclick="wicket()">W</button>
   </div>
+  <button class="secondary" onclick="undo()">Undo</button>
+</div>
 
-  <div class="card">
-    <p style="text-align:center;margin:0 0 8px;color:#9aa4bf;">This Over</p>
-    <div class="over-line" id="overLine"></div>
-  </div>
+<!-- RESULT -->
+<div class="card" id="resultCard" style="display:none;">
+  <div class="result" id="resultText"></div>
+</div>
 
-  <div class="controls">
-    <button class="btn run" onclick="addRun(0)">0</button>
-    <button class="btn run" onclick="addRun(1)">1</button>
-    <button class="btn run" onclick="addRun(2)">2</button>
-
-    <button class="btn run" onclick="addRun(3)">3</button>
-    <button class="btn four" onclick="addRun(4)">4</button>
-    <button class="btn run" onclick="addRun(5)">5</button>
-
-    <button class="btn six" onclick="addRun(6)">6</button>
-    <button class="btn wide" onclick="addWide()">Wd</button>
-    <button class="btn wicket" onclick="addWicket()">W</button>
-
-    <button class="btn undo" onclick="undo()">Undo</button>
-  </div>
-
-  <div class="footer">
-    Offline • Dark Mode • Gully Cricket
-  </div>
+<div class="footer">Offline • Dark Mode • Gully Cricket</div>
 
 </div>
 
 <script>
-let runs=0,wickets=0,balls=0,overBalls=[];
-let innings=1,target=null;
-let players=5; // last man standing logic
-let history=[];
+let runs = 0, wickets = 0, balls = 0;
+let totalOvers = 0, totalPlayers = 0;
+let innings = 1;
+let firstInningsScore = 0;
+let target = 0;
 
-function update(){
-  document.getElementById("score").innerText=`${runs} / ${wickets}`;
-  document.getElementById("over").innerText=`Over: ${Math.floor(balls/6)}.${balls%6}`;
-  document.getElementById("target").innerText=
-    (innings===2)?`Need ${target-runs} in ${((totalOvers*6)-balls)} balls`:"";
+let legalBallsThisOver = 0;
+let currentOver = [];
+let history = [];
+
+/* ---------- START ---------- */
+function startMatch() {
+  totalOvers = Number(overs.value);
+  totalPlayers = Number(players.value);
+
+  setup.style.display = "none";
+  scoreCard.style.display =
+  controls.style.display =
+  overCard.style.display = "block";
+
+  updateUI();
 }
 
-function addBall(label,legal=true){
-  history.push(JSON.stringify({runs,wickets,balls,overBalls:[...overBalls],innings,target}));
-  if(legal) balls++;
-  overBalls.push(label);
-  if(overBalls.filter(b=>b!=="Wd").length===6) overBalls=[];
-  renderOver();
-  update();
-  checkEnd();
+/* ---------- UNDO ---------- */
+function saveState() {
+  history.push(JSON.stringify({
+    runs, wickets, balls, innings,
+    legalBallsThisOver,
+    currentOver
+  }));
 }
 
-function addRun(n){
-  runs+=n;
-  addBall(n);
+function undo() {
+  if (!history.length) return;
+  let s = JSON.parse(history.pop());
+  ({ runs, wickets, balls, innings, legalBallsThisOver, currentOver } = s);
+  updateUI();
 }
 
-function addWide(){
-  runs+=1;
-  addBall("Wd",false);
+/* ---------- SCORING ---------- */
+function addRun(r) {
+  saveState();
+  runs += r;
+  balls++;
+  legalBallsThisOver++;
+  currentOver.push(r);
+  afterBall();
 }
 
-function addWicket(){
-  if(wickets < players-1){
-    wickets++;
-    addBall("W");
+function wide() {
+  saveState();
+  runs += 1;
+  currentOver.push("Wd");
+  updateUI();
+}
+
+function wicket() {
+  saveState();
+  wickets++;
+  balls++;
+  legalBallsThisOver++;
+  currentOver.push("W");
+  afterBall();
+}
+
+/* ---------- BALL / OVER ---------- */
+function afterBall() {
+  if (legalBallsThisOver === 6) {
+    legalBallsThisOver = 0;
+    currentOver = [];
+  }
+  checkInningsEnd();
+  updateUI();
+}
+
+/* ---------- INNINGS LOGIC (CORRECT LAST MAN STANDING) ---------- */
+function checkInningsEnd() {
+  const maxBalls = totalOvers * 6;
+
+  // Target chased (2nd innings)
+  if (innings === 2 && runs >= target) {
+    endMatch(fieldingTeam.value + " WON THE MATCH");
+    return;
+  }
+
+  // All out OR overs finished
+  if (balls >= maxBalls || wickets === totalPlayers) {
+    if (innings === 1) {
+      firstInningsScore = runs;
+      target = firstInningsScore + 1;
+
+      // Reset for second innings
+      runs = wickets = balls = 0;
+      legalBallsThisOver = 0;
+      currentOver = [];
+      innings = 2;
+    } else {
+      endMatch(battingTeam.value + " WON THE MATCH");
+    }
   }
 }
 
-function renderOver(){
-  const line=document.getElementById("overLine");
-  line.innerHTML="";
-  overBalls.forEach(b=>{
-    const d=document.createElement("div");
-    d.className="ball";
-    d.innerText=b;
-    line.appendChild(d);
-  });
+/* ---------- END MATCH ---------- */
+function endMatch(message) {
+  controls.style.display = "none";
+  resultCard.style.display = "block";
+  resultText.innerText = message;
 }
 
-function undo(){
-  if(!history.length) return;
-  const s=JSON.parse(history.pop());
-  ({runs,wickets,balls,overBalls,innings,target}=s);
-  renderOver();update();
-}
+/* ---------- UI ---------- */
+function updateUI() {
+  score.innerText = `${runs} / ${wickets}`;
+  overInfo.innerText = `Over: ${Math.floor(balls / 6)}.${balls % 6}`;
 
-let totalOvers=2;
-update();
+  teamTitle.innerText =
+    innings === 1
+      ? battingTeam.value + " (Batting)"
+      : fieldingTeam.value + " (Chasing)";
+
+  targetInfo.innerText =
+    innings === 2
+      ? `Target ${target} | Need ${target - runs} in ${(totalOvers * 6) - balls} balls`
+      : "";
+
+  overLine.innerHTML = currentOver.map(b => `<span>${b}</span>`).join("");
+}
 </script>
+
 </body>
 </html>
