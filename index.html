@@ -1,79 +1,123 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cricket Score Tracker</title>
 
 <style>
 body {
-  font-family: Arial;
-  background: #0b3d91;
-  color: white;
-  text-align: center;
   margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f1f5f9;
 }
-
-.container {
-  padding: 15px;
+header {
+  background: #0f172a;
+  color: white;
+  padding: 14px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
 }
-
+.container { padding: 12px; }
 .card {
-  background: #ffffff;
-  color: black;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 15px;
+  background: white;
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
-
-button {
+input {
+  width: 100%;
   padding: 10px;
-  margin: 5px;
-  font-size: 16px;
+  margin-bottom: 10px;
   border-radius: 8px;
-  border: none;
-  cursor: pointer;
+  border: 1px solid #cbd5f5;
+  font-size: 16px;
 }
-
-.run-btn { background: #1abc9c; color: white; }
-.extra-btn { background: #f39c12; color: white; }
-.wicket-btn { background: #e74c3c; color: white; }
-
-h2, h3 { margin: 8px; }
+.primary {
+  width: 100%;
+  padding: 12px;
+  font-size: 17px;
+  border-radius: 10px;
+  border: none;
+  background: #2563eb;
+  color: white;
+}
+.score-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.score {
+  font-size: 30px;
+  font-weight: bold;
+}
+.over, .info {
+  font-size: 14px;
+  color: #475569;
+}
+.target {
+  font-size: 15px;
+  color: #dc2626;
+  font-weight: 600;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+button {
+  padding: 16px;
+  font-size: 18px;
+  border-radius: 12px;
+  border: none;
+}
+.run { background: #22c55e; color: white; }
+.extra { background: #f59e0b; color: white; }
+.wicket { background: #ef4444; color: white; }
 </style>
 </head>
 
 <body>
 
+<header>🏏 Cricket Score Tracker</header>
+
 <div class="container">
 
-<h2>🏏 Cricket Score Tracker</h2>
-
 <div class="card">
-  Team A: <input id="teamA" placeholder="Team A"><br><br>
-  Team B: <input id="teamB" placeholder="Team B"><br><br>
-  Overs: <input id="overs" type="number" value="5"><br><br>
-  <button onclick="startMatch()">Start Match</button>
+  <input id="teamA" placeholder="Team A Name">
+  <input id="teamB" placeholder="Team B Name">
+  <input id="players" type="number" placeholder="Players per team (e.g. 6)">
+  <input id="overs" type="number" placeholder="Overs" value="5">
+  <button class="primary" onclick="startMatch()">Start Match</button>
 </div>
 
 <div class="card" id="scoreCard" style="display:none;">
-  <h3 id="inningTitle"></h3>
-  <h2 id="score">0/0</h2>
-  <p id="over">Overs: 0.0</p>
-  <p id="target"></p>
+  <div class="score-box">
+    <div>
+      <div id="inningTitle"></div>
+      <div class="over" id="over"></div>
+      <div class="target" id="target"></div>
+      <div class="info" id="chaseInfo"></div>
+    </div>
+    <div class="score" id="score">0/0</div>
+  </div>
 </div>
 
 <div class="card" id="controls" style="display:none;">
-  <button class="run-btn" onclick="addRun(0)">0</button>
-  <button class="run-btn" onclick="addRun(1)">1</button>
-  <button class="run-btn" onclick="addRun(2)">2</button>
-  <button class="run-btn" onclick="addRun(3)">3</button>
-  <button class="run-btn" onclick="addRun(4)">4</button>
-  <button class="run-btn" onclick="addRun(5)">5</button>
-  <button class="run-btn" onclick="addRun(6)">6</button><br>
-
-  <button class="extra-btn" onclick="wide()">Wide</button>
-  <button class="extra-btn" onclick="noBall()">No Ball</button>
-  <button class="wicket-btn" onclick="wicket()">Wicket</button>
+  <div class="grid">
+    <button class="run" onclick="addRun(0)">0</button>
+    <button class="run" onclick="addRun(1)">1</button>
+    <button class="run" onclick="addRun(2)">2</button>
+    <button class="run" onclick="addRun(3)">3</button>
+    <button class="run" onclick="addRun(4)">4</button>
+    <button class="run" onclick="addRun(5)">5</button>
+    <button class="run" onclick="addRun(6)">6</button>
+    <button class="extra" onclick="wide()">Wide</button>
+    <button class="extra" onclick="noBall()">No Ball</button>
+    <button class="wicket" onclick="wicket()">Wicket</button>
+  </div>
 </div>
 
 <div class="card" id="result" style="display:none;"></div>
@@ -81,7 +125,7 @@ h2, h3 { margin: 8px; }
 </div>
 
 <script>
-let teamA, teamB, maxOvers;
+let teamA, teamB, maxOvers, playersPerTeam;
 let runs = 0, wickets = 0, balls = 0;
 let innings = 1;
 let target = 0;
@@ -90,6 +134,7 @@ function startMatch() {
   teamA = teamA = document.getElementById("teamA").value;
   teamB = teamB = document.getElementById("teamB").value;
   maxOvers = parseInt(document.getElementById("overs").value);
+  playersPerTeam = parseInt(document.getElementById("players").value);
 
   document.getElementById("scoreCard").style.display = "block";
   document.getElementById("controls").style.display = "block";
@@ -103,36 +148,47 @@ function updateUI() {
 
   if (innings === 1) {
     document.getElementById("inningTitle").innerText = teamA + " Batting";
+    document.getElementById("target").innerText = "";
+    document.getElementById("chaseInfo").innerText = "";
   } else {
+    let ballsLeft = maxOvers * 6 - balls;
+    let runsNeeded = target - runs;
     document.getElementById("inningTitle").innerText = teamB + " Batting";
     document.getElementById("target").innerText = "Target: " + target;
+    document.getElementById("chaseInfo").innerText =
+      runsNeeded + " runs needed in " + ballsLeft + " balls";
   }
 }
 
 function addRun(r) {
   runs += r;
   balls++;
-  checkOver();
+  checkState();
 }
 
 function wide() {
-  runs += 1;
+  runs++;
   updateUI();
 }
 
 function noBall() {
-  runs += 1;
+  runs++;
   updateUI();
 }
 
 function wicket() {
   wickets++;
   balls++;
-  checkOver();
+  checkState();
 }
 
-function checkOver() {
-  if (balls >= maxOvers * 6 || wickets >= 10) {
+function checkState() {
+  if (innings === 2 && runs >= target) {
+    endMatch();
+    return;
+  }
+
+  if (balls >= maxOvers * 6 || wickets >= playersPerTeam - 1) {
     endInnings();
   } else {
     updateUI();
@@ -156,13 +212,9 @@ function endMatch() {
   document.getElementById("controls").style.display = "none";
   document.getElementById("result").style.display = "block";
 
-  if (runs >= target) {
-    document.getElementById("result").innerHTML =
-      "<h2>" + teamB + " won the match!</h2>";
-  } else {
-    document.getElementById("result").innerHTML =
-      "<h2>" + teamA + " won the match!</h2>";
-  }
+  let winner = runs >= target ? teamB : teamA;
+  document.getElementById("result").innerHTML =
+    "<h3>" + winner + " won the match 🏆</h3>";
 }
 </script>
 
