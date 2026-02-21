@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Local Cricket Score</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>🏏 Local Cricket Score</h1>
+
+<div class="teams">
+  <input id="teamA" placeholder="Team A">
+  <input id="teamB" placeholder="Team B">
+</div>
+
+<h2 id="score">0 / 0</h2>
+<h3 id="overs">Overs: 0.0</h3>
+
+<div class="buttons">
+  <button onclick="addRun(0)">0</button>
+  <button onclick="addRun(1)">1</button>
+  <button onclick="addRun(2)">2</button>
+  <button onclick="addRun(3)">3</button>
+  <button onclick="addRun(4)">4</button>
+  <button onclick="addRun(6)">6</button>
+  <button class="wicket" onclick="addWicket()">Wicket</button>
+</div>
+
+<button class="reset" onclick="resetMatch()">Reset Match</button>
+
+<script src="script.js"></script>
+</body>
+</html>
